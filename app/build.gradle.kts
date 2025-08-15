@@ -27,6 +27,13 @@ android {
             )
         }
     }
+
+    // Add this to enable BuildConfig generation
+    buildFeatures {
+        buildConfig = true  // This enables BuildConfig
+        compose = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -52,6 +59,13 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
 
+    // Networking - Retrofit + Moshi
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.moshi)  // Using Moshi converter
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
