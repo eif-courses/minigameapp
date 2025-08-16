@@ -47,7 +47,7 @@ android {
 }
 
 dependencies {
-
+    implementation("androidx.browser:browser:1.9.0")
     // Koin BOM
     implementation(project.dependencies.platform(libs.koin.bom))
 
