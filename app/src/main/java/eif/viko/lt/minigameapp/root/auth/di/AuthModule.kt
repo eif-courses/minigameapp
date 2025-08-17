@@ -1,50 +1,22 @@
 package eif.viko.lt.minigameapp.root.auth.di
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import eif.viko.lt.minigameapp.root.BuildConfig
-import eif.viko.lt.minigameapp.root.auth.data.ApiService
-import eif.viko.lt.minigameapp.root.auth.data.OAuthManager
-import eif.viko.lt.minigameapp.root.auth.data.UserRepository
-import eif.viko.lt.minigameapp.root.auth.data.remote.DiabloApiService
-import eif.viko.lt.minigameapp.root.auth.presentation.login.LoginViewModel
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import org.koin.android.ext.koin.androidContext
+
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
-import java.util.concurrent.TimeUnit
+
 
 
 
 val authModule = module {
 
-    // API Service
-    single<DiabloApiService> {
-        DiabloApiService.create()
-    }
 
-    // OAuth Manager
-    single<OAuthManager> {
-        OAuthManager(androidContext())
-    }
-
-    // Repository
-    single<UserRepository> {
-        UserRepository(
-            apiService = get(),
-            oauthManager = get()
-        )
-    }
 
     // ViewModel
-    viewModel<LoginViewModel> {
-        LoginViewModel(
-            userRepository = get()
-        )
-    }
+//    viewModel<LoginViewModel> {
+//        LoginViewModel(
+//            userRepository = get()
+//        )
+//    }
 }
 
 
