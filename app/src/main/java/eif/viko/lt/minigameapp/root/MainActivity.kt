@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import eif.viko.lt.minigameapp.root.navigation.presentation.bottom_nav.RootGraph
 
 
 import eif.viko.lt.minigameapp.root.ui.theme.MinigameappTheme
@@ -29,51 +30,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MinigameappTheme {
-                val navController = rememberNavController()
-                NavHost(
-                    navController = navController,
-                    startDestination = ScreenA
-                ) {
-                    composable<ScreenA> {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Button(onClick = {
-                                navController.navigate(
-                                    ScreenB(
-                                        name = "Marius",
-                                        age = 39
-                                    )
-                                )
-                            }) {
-                                Text(text = "Go to Screen B")
-                            }
-                        }
-                    }
-                    composable<ScreenB> {
-                        val args = it.toRoute<ScreenB>()
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(text = "${args.name}, ${args.age} years old")
-                        }
-                    }
-                }
+                RootGraph()
             }
         }
     }
 
 }
-
-@Serializable
-object ScreenA
-
-@Serializable
-data class ScreenB(
-    val name: String?,
-    val age: Int
-)
