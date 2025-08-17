@@ -1,8 +1,10 @@
+// In your MainActivity.kt
 package eif.viko.lt.minigameapp.root
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -37,6 +39,7 @@ class MainActivity : ComponentActivity() {
                     // Handle pending OAuth redirect
                     LaunchedEffect(pendingAuthCode, pendingAuthState) {
                         if (pendingAuthCode != null && pendingAuthState != null) {
+                            Log.d("OAuth", "Processing auth code: $pendingAuthCode")
                             viewModel.handleAuthorizationCode(pendingAuthCode!!, pendingAuthState!!)
                             pendingAuthCode = null
                             pendingAuthState = null
@@ -52,22 +55,54 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Alternative: Handle new intents differently for newer Android versions
-    override fun onResume() {
-        super.onResume()
-        // Re-handle the intent in case it changed
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
         handleOAuthIntent(intent)
     }
 
     private fun handleOAuthIntent(intent: Intent?) {
         val data: Uri? = intent?.data
         if (data != null) {
-            val code = data.getQueryParameter("code")
-            val state = data.getQueryParameter("state")
+            Log.d("OAuth", "Received intent: ${data.toString()}")
 
-            if (code != null && state != null && pendingAuthCode == null) {
-                pendingAuthCode = code
-                pendingAuthState = state
+            val scheme = data.scheme
+            val host = data.host
+
+            when {
+                // Handle custom scheme: eif.viko.lt.minigameapp.root://oauth?code=...&state=...&success=true
+                scheme == "minigameapp" && host == "oauth" -> {
+                    val success = data.getBooleanQueryParameter("success", false)
+                    val error = data.getQueryParameter("error")
+                    val code = data.getQueryParameter("code")
+                    val state = data.getQueryParameter("state")
+
+                    Log.d("OAuth", "Custom scheme callback - success: $success, code: $code, error: $error")
+
+                    when {
+                        success && code != null && state != null -> {
+                            Log.d("OAuth", "Setting pending auth code")
+                            pendingAuthCode = code
+                            pendingAuthState = state
+                        }
+                        error != null -> {
+                            Log.e("OAuth", "OAuth error received: $error")
+                            // You could show an error message in your UI here
+                        }
+                    }
+                }
+                // Fallback: Handle regular OAuth callback URLs
+                data.toString().contains("code=") -> {
+                    val code = data.getQueryParameter("code")
+                    val state = data.getQueryParameter("state")
+
+                    Log.d("OAuth", "Regular callback - code: $code, state: $state")
+
+                    if (code != null && state != null) {
+                        pendingAuthCode = code
+                        pendingAuthState = state
+                    }
+                }
             }
         }
     }
