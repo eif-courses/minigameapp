@@ -15,29 +15,27 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigationevent.NavigationEventDispatcher
+import eif.viko.lt.minigameapp.root.auth.presentation.screens.SignInScreen
 
 @Composable
 fun RootGraph() {
 
-    val backStack = rememberNavBackStack<Screen> (Screen.Auth)
+    val backStack = rememberNavBackStack<Screen>(Screen.Auth)
 
     NavDisplay(
         backStack = backStack,
-        onBack = {backStack.removeLastOrNull()},
+        onBack = { backStack.removeLastOrNull() },
         entryDecorators = listOf(
             rememberSavedStateNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator()
         ),
         entryProvider = entryProvider {
             entry<Screen.Auth> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Button(onClick = { backStack.add(Screen.NestedGraph) }) {
-                        Text(text = "Sign in")
+                SignInScreen(
+                    onNavigateToHome = {
+                        backStack.add(Screen.NestedGraph)
                     }
-                }
+                )
             }
             entry<Screen.Settings> {
                 Box(
