@@ -5,18 +5,24 @@ import eif.viko.lt.minigameapp.root.auth.data.remote.mappers.toDomainModel
 import eif.viko.lt.minigameapp.root.auth.domain.models.AuthResult
 import eif.viko.lt.minigameapp.root.auth.domain.models.TokenData
 import eif.viko.lt.minigameapp.root.auth.domain.repository.AuthRepository
+import eif.viko.lt.minigameapp.root.auth.domain.utils.TokenStorage
 import okio.IOException
 import retrofit2.HttpException
 
 class AuthRepositoryImpl(
-    private val api: AuthApi
+    private val api: AuthApi,
+    private val tokenStorage: TokenStorage
 ) : AuthRepository {
 
     override suspend fun signIn(email: String, password: String): AuthResult<TokenData> {
         return try {
             val request = SignInRequest(email = email, password = password)
             val response = api.signIn(request)
-            AuthResult.Success(response.toDomainModel())
+            val domainModel = response.toDomainModel()
+
+            // Issaugom tokena po prisijungimo
+            tokenStorage.saveToken(domainModel.accessToken)
+            AuthResult.Success(domainModel)
         } catch (e: HttpException) {
             when (e.code()) {
                 400 -> AuthResult.Error("Invalid request. Please check your input.")
@@ -29,6 +35,18 @@ class AuthRepositoryImpl(
         } catch (e: Exception) {
             AuthResult.Error("Unexpected error: ${e.message}")
         }
+    }
+
+    override suspend fun signOut() {
+        tokenStorage.clearToken()
+    }
+
+    override suspend fun isUserIsSignedIn(): Boolean {
+        return tokenStorage.hasValidToken()
+    }
+
+    override suspend fun getCurrentToken(): String? {
+        return tokenStorage.getToken()
     }
 
 }

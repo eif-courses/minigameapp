@@ -49,6 +49,12 @@ android {
 
 dependencies {
 
+
+    // Secure JWT tokens
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.tink.android)
+// or latest
+
     // Navigation
     implementation(libs.androidx.material3.adaptive)
     implementation(libs.androidx.material3.adaptive.layout)

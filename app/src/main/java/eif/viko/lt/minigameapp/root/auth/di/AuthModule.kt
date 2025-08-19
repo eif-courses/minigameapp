@@ -4,13 +4,17 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import eif.viko.lt.minigameapp.root.BuildConfig
 import eif.viko.lt.minigameapp.root.auth.data.remote.AuthApi
+import eif.viko.lt.minigameapp.root.auth.data.remote.AuthInterceptor
 import eif.viko.lt.minigameapp.root.auth.data.remote.AuthRepositoryImpl
 import eif.viko.lt.minigameapp.root.auth.domain.repository.AuthRepository
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignInUseCase
+import eif.viko.lt.minigameapp.root.auth.domain.utils.SecureTokenStorage
+import eif.viko.lt.minigameapp.root.auth.domain.utils.TokenStorage
 import eif.viko.lt.minigameapp.root.auth.presentation.viewmodel.SignInViewModel
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -19,6 +23,16 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 val authModule = module {
+
+    // Tokenu saugykla
+    single<TokenStorage> {
+        SecureTokenStorage(context = androidContext())
+    }
+
+    // Tokeno iterpimui i http requestus
+    single<AuthInterceptor>{
+        AuthInterceptor(tokenStorage = get())
+    }
 
     /* Moshi JSON converter */
     single<Moshi> {
@@ -30,6 +44,7 @@ val authModule = module {
     /* OkHttp Client */
     single<OkHttpClient> {
         OkHttpClient.Builder()
+            .addInterceptor(get<AuthInterceptor>())
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = if (BuildConfig.DEBUG) {
                     HttpLoggingInterceptor.Level.BODY
@@ -58,9 +73,11 @@ val authModule = module {
     }
 
     /* Repository */
+
     single<AuthRepository> {
         AuthRepositoryImpl(
-            api = get()
+            api = get(),
+            tokenStorage = get()
         )
     }
 
