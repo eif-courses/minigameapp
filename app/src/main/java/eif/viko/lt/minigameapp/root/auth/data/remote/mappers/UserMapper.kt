@@ -7,10 +7,10 @@ fun UserDto.toDomainModel(): User {
     return User(
         id = id,
         email = email,
-        firstName = first_name,  // Convert snake_case to camelCase
-        lastName = last_name,
+        firstName = firstName,
+        lastName = lastName,
         role = role,
-        isActive = is_active,
-        createdAt = created_at
+        isActive = isActive,
+        createdAt = createdAt
     )
 }

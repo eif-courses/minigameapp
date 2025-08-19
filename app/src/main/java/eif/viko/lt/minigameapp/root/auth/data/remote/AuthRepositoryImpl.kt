@@ -1,9 +1,11 @@
 package eif.viko.lt.minigameapp.root.auth.data.remote
 
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignInRequest
+import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignUpRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.mappers.toDomainModel
 import eif.viko.lt.minigameapp.root.auth.domain.models.AuthResult
 import eif.viko.lt.minigameapp.root.auth.domain.models.TokenData
+import eif.viko.lt.minigameapp.root.auth.domain.models.User
 import eif.viko.lt.minigameapp.root.auth.domain.repository.AuthRepository
 import eif.viko.lt.minigameapp.root.auth.domain.utils.TokenStorage
 import okio.IOException
@@ -32,6 +34,30 @@ class AuthRepositoryImpl(
             }
         } catch (e: IOException) {
             AuthResult.Error("Network connection error. Please check your internet. ${e.message}")
+        } catch (e: Exception) {
+            AuthResult.Error("Unexpected error: ${e.message}")
+        }
+    }
+    override suspend fun signUp(email: String, password: String, firstName: String, lastName: String): AuthResult<User> {
+        return try {
+            val request = SignUpRequest(
+                email = email,
+                password = password,
+                firstName = firstName,
+                lastName = lastName
+            )
+            val response = api.signUp(request)
+
+            // Don't save token since registration doesn't return one
+            AuthResult.Success(response.user.toDomainModel())
+        } catch (e: HttpException) {
+            when (e.code()) {
+                400 -> AuthResult.Error("All fields are required")
+                409 -> AuthResult.Error("Email already registered")
+                else -> AuthResult.Error("Registration failed: ${e.message()}")
+            }
+        } catch (e: IOException) {
+            AuthResult.Error("Network connection error. Please check your internet.")
         } catch (e: Exception) {
             AuthResult.Error("Unexpected error: ${e.message}")
         }

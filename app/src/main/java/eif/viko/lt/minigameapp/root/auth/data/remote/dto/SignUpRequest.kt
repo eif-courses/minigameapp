@@ -4,19 +4,13 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class UserDto(
-    @param:Json(name = "id")
-    val id: String,
+data class SignUpRequest(
     @param:Json(name = "email")
     val email: String,
+    @param:Json(name = "password")
+    val password: String,
     @param:Json(name = "first_name")
     val firstName: String,
     @param:Json(name = "last_name")
-    val lastName: String,
-    @param:Json(name = "role")
-    val role: String,
-    @param:Json(name = "is_active")
-    val isActive: Boolean,
-    @param:Json(name = "created_at")
-    val createdAt: String? = null
+    val lastName: String
 )

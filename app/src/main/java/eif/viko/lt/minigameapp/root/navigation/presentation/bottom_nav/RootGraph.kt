@@ -10,14 +10,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation.NavHost
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.navigationevent.NavigationEventDispatcher
 import eif.viko.lt.minigameapp.root.auth.presentation.screens.SignInScreen
+import eif.viko.lt.minigameapp.root.auth.presentation.screens.SignUpScreen
 import eif.viko.lt.minigameapp.root.auth.presentation.viewmodel.AuthState
 import eif.viko.lt.minigameapp.root.auth.presentation.viewmodel.AuthStateViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -72,9 +71,21 @@ fun RootGraph() {
                     onNavigateToHome = {
                         // CHANGE THIS: Notify auth success instead of direct navigation
                         authViewModel.onSignInSuccess()
+                    },
+                    onNavigateToSignUp = {
+                        backStack.add(Screen.SignUp)
                     }
                 )
             }
+
+            entry<Screen.SignUp>{
+                SignUpScreen(
+                    onNavigateToSignIn = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+
             entry<Screen.Settings> {
                 Box(
                     modifier = Modifier.fillMaxSize(),

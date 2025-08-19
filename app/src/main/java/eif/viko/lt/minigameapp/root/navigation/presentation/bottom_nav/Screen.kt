@@ -10,6 +10,9 @@ sealed class Screen : NavKey {
     data object Auth : Screen()
 
     @Serializable
+    data object SignUp : Screen()
+
+    @Serializable
     data object NestedGraph: Screen()
 
     @Serializable

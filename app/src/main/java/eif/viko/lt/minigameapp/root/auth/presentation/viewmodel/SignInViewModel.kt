@@ -71,12 +71,12 @@ class SignInViewModel(
         uiState = uiState.copy(error = null)
     }
 
-    fun signOut() {
-        viewModelScope.launch {
-            authRepository.signOut()
-            uiState = SignInUiState() // Reset to initial state
-        }
-    }
+//    fun signOut() {
+//        viewModelScope.launch {
+//            authRepository.signOut()
+//            uiState = SignInUiState() // Reset to initial state
+//        }
+//    }
 }
 
 

@@ -10,21 +10,20 @@ import eif.viko.lt.minigameapp.root.auth.domain.repository.AuthRepository
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.CheckAuthStatusUseCase
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignInUseCase
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignOutUseCase
+import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignUpUseCase
 import eif.viko.lt.minigameapp.root.auth.domain.utils.SecureTokenStorage
 import eif.viko.lt.minigameapp.root.auth.domain.utils.TokenStorage
 import eif.viko.lt.minigameapp.root.auth.presentation.viewmodel.AuthStateViewModel
 import eif.viko.lt.minigameapp.root.auth.presentation.viewmodel.SignInViewModel
-
+import eif.viko.lt.minigameapp.root.auth.presentation.viewmodel.SignUpViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.androidx.viewmodel.dsl.viewModelOf
-import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
+import org.koin.core.module.dsl.viewModelOf // Add this import
 
 val authModule = module {
 
@@ -98,19 +97,12 @@ val authModule = module {
         SignOutUseCase(repository = get())
     }
 
-    viewModel<SignInViewModel> {
-        SignInViewModel(
-            signInUseCase = get(),
-            authRepository = get()
-        )
+    single<SignUpUseCase>{
+        SignUpUseCase(repository = get())
     }
 
-    viewModel<AuthStateViewModel> {
-        AuthStateViewModel(
-            checkAuthStatusUseCase = get(),
-            signOutUseCase = get()
-        )
-    }
-
+    viewModelOf(::SignInViewModel)      // Replace viewModel<SignInViewModel> { SignInViewModel(...) }
+    viewModelOf(::SignUpViewModel)      // Replace viewModel<SignUpViewModel> { SignUpViewModel(...) }
+    viewModelOf(::AuthStateViewModel)   // Replace viewModel<AuthStateViewModel> { AuthStateViewModel(...) }
 
 }

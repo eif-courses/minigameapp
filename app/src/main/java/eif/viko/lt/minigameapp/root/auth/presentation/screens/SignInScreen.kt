@@ -13,6 +13,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,6 +30,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SignInScreen(
     onNavigateToHome: () -> Unit, // Move this parameter first
+    onNavigateToSignUp: () -> Unit,
     viewModel: SignInViewModel = koinViewModel()
 ) {
     val uiState = viewModel.uiState
@@ -99,6 +101,14 @@ fun SignInScreen(
                 Text("Sign In")
             }
         }
+
+        TextButton(
+            onClick = onNavigateToSignUp, // Add this parameter
+            enabled = !uiState.isLoading
+        ) {
+            Text("Don't have an account? Sign Up")
+        }
+
 
         // Show error message
         uiState.error?.let { error ->
