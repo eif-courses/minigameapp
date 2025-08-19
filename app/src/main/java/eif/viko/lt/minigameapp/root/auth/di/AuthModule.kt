@@ -7,15 +7,19 @@ import eif.viko.lt.minigameapp.root.auth.data.remote.AuthApi
 import eif.viko.lt.minigameapp.root.auth.data.remote.AuthInterceptor
 import eif.viko.lt.minigameapp.root.auth.data.remote.AuthRepositoryImpl
 import eif.viko.lt.minigameapp.root.auth.domain.repository.AuthRepository
+import eif.viko.lt.minigameapp.root.auth.domain.use_cases.CheckAuthStatusUseCase
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignInUseCase
+import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignOutUseCase
 import eif.viko.lt.minigameapp.root.auth.domain.utils.SecureTokenStorage
 import eif.viko.lt.minigameapp.root.auth.domain.utils.TokenStorage
+import eif.viko.lt.minigameapp.root.auth.presentation.viewmodel.AuthStateViewModel
 import eif.viko.lt.minigameapp.root.auth.presentation.viewmodel.SignInViewModel
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -87,6 +91,26 @@ val authModule = module {
             repository = get()
         )
     }
+    single<CheckAuthStatusUseCase>{
+        CheckAuthStatusUseCase(repository = get())
+    }
+    single<SignOutUseCase>{
+        SignOutUseCase(repository = get())
+    }
 
-    viewModelOf(::SignInViewModel)
+    viewModel<SignInViewModel> {
+        SignInViewModel(
+            signInUseCase = get(),
+            authRepository = get()
+        )
+    }
+
+    viewModel<AuthStateViewModel> {
+        AuthStateViewModel(
+            checkAuthStatusUseCase = get(),
+            signOutUseCase = get()
+        )
+    }
+
+
 }

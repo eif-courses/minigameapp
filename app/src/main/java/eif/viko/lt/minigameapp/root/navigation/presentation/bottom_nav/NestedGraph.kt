@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,20 +25,18 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import eif.viko.lt.minigameapp.root.R
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NestedGraph(navigateToSettings: () -> Unit) {
+fun NestedGraph(navigateToSettings: () -> Unit,  onSignOut: () -> Unit) {
 
     val backStack = rememberNavBackStack<BottomBarScreen>(BottomBarScreen.Home)
 
@@ -59,6 +58,13 @@ fun NestedGraph(navigateToSettings: () -> Unit) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings icon"
+                        )
+                    }
+                    // ADD THIS: Optional sign-out button
+                    IconButton(onClick = onSignOut) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp, // You'll need to import this
+                            contentDescription = "Sign out"
                         )
                     }
                 }

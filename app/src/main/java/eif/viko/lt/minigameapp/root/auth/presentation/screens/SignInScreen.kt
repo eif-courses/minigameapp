@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -27,8 +28,8 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SignInScreen(
-    viewModel: SignInViewModel = koinViewModel(),
-    onNavigateToHome: () -> Unit
+    onNavigateToHome: () -> Unit, // Move this parameter first
+    viewModel: SignInViewModel = koinViewModel()
 ) {
     val uiState = viewModel.uiState
     var email by remember { mutableStateOf("") }
@@ -45,8 +46,16 @@ fun SignInScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally // Add this for better alignment
     ) {
+        // Add a title
+        Text(
+            text = "Welcome Back",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -55,6 +64,7 @@ fun SignInScreen(
             },
             label = { Text("Email") },
             enabled = !uiState.isLoading,
+            isError = uiState.error != null, // Add error state to field
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -69,6 +79,7 @@ fun SignInScreen(
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             enabled = !uiState.isLoading,
+            isError = uiState.error != null, // Add error state to field
             modifier = Modifier.fillMaxWidth()
         )
 
