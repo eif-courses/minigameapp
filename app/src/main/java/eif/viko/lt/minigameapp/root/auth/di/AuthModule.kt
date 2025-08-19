@@ -9,6 +9,7 @@ import eif.viko.lt.minigameapp.root.auth.data.remote.AuthRepositoryImpl
 import eif.viko.lt.minigameapp.root.auth.domain.repository.AuthRepository
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.CheckAuthStatusUseCase
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignInUseCase
+import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignInWithBattleNetUseCase
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignOutUseCase
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignUpUseCase
 import eif.viko.lt.minigameapp.root.auth.domain.utils.SecureTokenStorage
@@ -99,6 +100,9 @@ val authModule = module {
 
     single<SignUpUseCase>{
         SignUpUseCase(repository = get())
+    }
+    single <SignInWithBattleNetUseCase>{
+        SignInWithBattleNetUseCase(repository = get())
     }
 
     viewModelOf(::SignInViewModel)      // Replace viewModel<SignInViewModel> { SignInViewModel(...) }

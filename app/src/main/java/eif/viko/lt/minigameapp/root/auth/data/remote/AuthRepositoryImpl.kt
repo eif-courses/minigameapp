@@ -1,5 +1,6 @@
 package eif.viko.lt.minigameapp.root.auth.data.remote
 
+import eif.viko.lt.minigameapp.root.auth.data.remote.dto.BattleNetTokenRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignInRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignUpRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.mappers.toDomainModel
@@ -74,5 +75,33 @@ class AuthRepositoryImpl(
     override suspend fun getCurrentToken(): String? {
         return tokenStorage.getToken()
     }
+
+
+
+    override suspend fun signInWithBattleNet(authorizationCode: String): AuthResult<TokenData> {
+        return try {
+            val request = BattleNetTokenRequest(
+                authorizationCode = authorizationCode,
+                redirectURI = "https://minigameapi-production.up.railway.app/oauth/mobile"
+            )
+            val response = api.signInWithBattleNet(request)
+            val domainModel = response.toDomainModel()
+
+            tokenStorage.saveToken(domainModel.accessToken)
+
+            AuthResult.Success(domainModel)
+        } catch (e: HttpException) {
+            when (e.code()) {
+                400 -> AuthResult.Error("Invalid authorization code")
+                401 -> AuthResult.Unauthorized
+                else -> AuthResult.Error("Battle.net authentication failed: ${e.message()}")
+            }
+        } catch (e: IOException) {
+            AuthResult.Error("Network connection error. Please check your internet.")
+        } catch (e: Exception) {
+            AuthResult.Error("Unexpected error: ${e.message}")
+        }
+    }
+
 
 }

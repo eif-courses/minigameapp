@@ -10,4 +10,8 @@ interface AuthRepository {
     suspend fun signOut()
     suspend fun isUserIsSignedIn(): Boolean
     suspend fun getCurrentToken(): String?
+
+    suspend fun signInWithBattleNet(authorizationCode: String): AuthResult<TokenData>
+
+
 }

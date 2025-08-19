@@ -1,5 +1,6 @@
 package eif.viko.lt.minigameapp.root.auth.data.remote
 
+import eif.viko.lt.minigameapp.root.auth.data.remote.dto.BattleNetTokenRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignInRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignUpRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignUpResponse
@@ -12,4 +13,8 @@ interface AuthApi {
     suspend fun signIn(@Body request: SignInRequest): TokenResponse
     @POST("api/v1/auth/register")
     suspend fun signUp(@Body request: SignUpRequest): SignUpResponse
+
+    @POST("api/v1/auth/battlenet/token")
+    suspend fun signInWithBattleNet(@Body request: BattleNetTokenRequest): TokenResponse
+
 }

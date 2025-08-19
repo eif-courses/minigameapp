@@ -17,6 +17,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["appAuthRedirectScheme"] = "minigameapp"
     }
 
     buildTypes {
@@ -48,6 +50,12 @@ android {
 }
 
 dependencies {
+
+
+    // Battle net api
+    implementation(libs.androidx.browser) // For Custom Tabs
+    //implementation(libs.appauth) // OAuth library
+    //
 
 
     // Secure JWT tokens

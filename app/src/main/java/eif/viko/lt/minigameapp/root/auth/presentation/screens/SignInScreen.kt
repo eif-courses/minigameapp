@@ -2,6 +2,7 @@ package eif.viko.lt.minigameapp.root.auth.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -23,13 +25,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import eif.viko.lt.minigameapp.root.auth.presentation.components.BattleNetSignInButton
 import eif.viko.lt.minigameapp.root.auth.presentation.viewmodel.SignInViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SignInScreen(
-    onNavigateToHome: () -> Unit, // Move this parameter first
+    onNavigateToHome: () -> Unit,
     onNavigateToSignUp: () -> Unit,
     viewModel: SignInViewModel = koinViewModel()
 ) {
@@ -49,15 +53,16 @@ fun SignInScreen(
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally // Add this for better alignment
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Add a title
+        // Title
         Text(
             text = "Welcome Back",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
+        // Email field
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -66,12 +71,13 @@ fun SignInScreen(
             },
             label = { Text("Email") },
             enabled = !uiState.isLoading,
-            isError = uiState.error != null, // Add error state to field
+            isError = uiState.error != null,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Password field
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -81,12 +87,13 @@ fun SignInScreen(
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             enabled = !uiState.isLoading,
-            isError = uiState.error != null, // Add error state to field
+            isError = uiState.error != null,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Regular Sign In Button
         Button(
             onClick = { viewModel.signIn(email, password) },
             enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank(),
@@ -102,13 +109,49 @@ fun SignInScreen(
             }
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Divider with "OR"
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Divider(
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.outline
+            )
+            Text(
+                text = "OR",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Divider(
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Battle.net Sign-In Button
+        BattleNetSignInButton(
+            onAuthCode = { authCode ->
+                viewModel.signInWithBattleNet(authCode)
+            },
+            enabled = !uiState.isLoading,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Sign Up link
         TextButton(
-            onClick = onNavigateToSignUp, // Add this parameter
+            onClick = onNavigateToSignUp,
             enabled = !uiState.isLoading
         ) {
             Text("Don't have an account? Sign Up")
         }
-
 
         // Show error message
         uiState.error?.let { error ->
@@ -116,7 +159,8 @@ fun SignInScreen(
             Text(
                 text = error,
                 color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center
             )
         }
     }
