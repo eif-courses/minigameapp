@@ -24,7 +24,7 @@ class SignInViewModel(
     var uiState by mutableStateOf(SignInUiState())
 
     init {
-        checkAuthStatus()
+        //checkAuthStatus()
         //checkForOAuthCode()
         clearAnyLeftoverOAuthCodes()
     }
@@ -32,7 +32,7 @@ class SignInViewModel(
     private fun checkAuthStatus() {
         viewModelScope.launch {
             val isLoggedIn = authRepository.isUserIsSignedIn()
-            uiState = uiState.copy(isSignedIn = isLoggedIn)
+            //uiState = uiState.copy(isSignedIn = isLoggedIn)
         }
     }
 
@@ -105,11 +105,13 @@ class SignInViewModel(
 
             when(val result = signInUseCase(email, password)) {
                 is AuthResult.Success -> {
+                    println("✅ SignInViewModel: Email sign-in successful")
                     uiState = uiState.copy(
                         isLoading = false,
-                        isSignedIn = true,
+                        // Remove this: isSignedIn = true,
                         user = result.data.user
                     )
+                    println("✅ SignInViewModel: UI state updated, triggering auth refresh")
                 }
                 is AuthResult.Error -> {
                     uiState = uiState.copy(
@@ -131,30 +133,41 @@ class SignInViewModel(
     fun signInWithBattleNet(authorizationCode: String) {
         if (uiState.isLoading) return
 
+        println("🎮 SignInViewModel.signInWithBattleNet() called")
         viewModelScope.launch {
             uiState = uiState.copy(isLoading = true, error = null)
+            println("🎮 SignInViewModel: Set loading = true")
 
             when(val result = signInWithBattleNetUseCase(authorizationCode)) {
                 is AuthResult.Success -> {
+                    println("✅ SignInViewModel: AuthResult.Success received")
+                    println("✅ SignInViewModel: User = ${result.data.user.email}")
+
                     uiState = uiState.copy(
                         isLoading = false,
-                        isSignedIn = true,
+                        // Remove this: isSignedIn = true,
                         user = result.data.user
                     )
+
+                    println("✅ SignInViewModel: UI state updated, sign-in complete")
                 }
                 is AuthResult.Error -> {
+                    println("❌ SignInViewModel: AuthResult.Error = ${result.message}")
                     uiState = uiState.copy(
                         isLoading = false,
                         error = result.message ?: "Battle.net authentication failed"
                     )
                 }
                 is AuthResult.Unauthorized -> {
+                    println("❌ SignInViewModel: AuthResult.Unauthorized")
                     uiState = uiState.copy(
                         isLoading = false,
                         error = "Battle.net authentication failed. Please try again."
                     )
                 }
-                is AuthResult.Loading -> {}
+                is AuthResult.Loading -> {
+                    println("⏳ SignInViewModel: AuthResult.Loading")
+                }
             }
         }
     }
@@ -171,9 +184,16 @@ class SignInViewModel(
     }
 }
 
+//data class SignInUiState(
+//    val isLoading: Boolean = false,
+//    val error: String? = null,
+//    val isSignedIn: Boolean = false,
+//    val user: User? = null
+//)
+
 data class SignInUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isSignedIn: Boolean = false,
+    // Remove this line: val isSignedIn: Boolean = false,
     val user: User? = null
 )

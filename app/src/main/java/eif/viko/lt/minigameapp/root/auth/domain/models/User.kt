@@ -7,6 +7,17 @@ data class User(
     val lastName: String,
     val role: String,
     val isActive: Boolean,
-    val createdAt: String? = null,  // Optional since you might not always need it
-    val fullName: String = "$firstName $lastName"
+    val createdAt: String? = null,
+    val fullName: String = "$firstName $lastName",
+    val authProvider: String = "email",    // Add this
+    val hasBattleNet: Boolean = false      // Add this
 )
+
+// Update extensions to use the fields
+fun User.hasBattleNetAccess(): Boolean {
+    return hasBattleNet // Use the explicit field
+}
+
+fun User.getAuthProvider(): String {
+    return authProvider // Use the explicit field
+}

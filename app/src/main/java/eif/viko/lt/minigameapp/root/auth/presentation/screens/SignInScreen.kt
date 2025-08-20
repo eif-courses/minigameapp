@@ -41,12 +41,16 @@ fun SignInScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    // Handle successful login
-    LaunchedEffect(uiState.isSignedIn) {
-        if (uiState.isSignedIn) {
-            onNavigateToHome()
-        }
-    }
+
+
+// SIGN IN
+//    LaunchedEffect(uiState.isSignedIn) {
+//        println("🔄 SignInScreen LaunchedEffect: isSignedIn = ${uiState.isSignedIn}")
+//        if (uiState.isSignedIn) {
+//            println("🎉 SignInScreen: User signed in, calling onNavigateToHome")
+//            onNavigateToHome()
+//        }
+//    }
 
 
 
@@ -137,13 +141,22 @@ fun SignInScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Battle.net Sign-In Button
+//        BattleNetSignInButton(
+//            onAuthCode = { authCode ->
+//                viewModel.signInWithBattleNet(authCode)
+//            },
+//            enabled = !uiState.isLoading,
+//            modifier = Modifier.fillMaxWidth()
+//        )
         BattleNetSignInButton(
             onAuthCode = { authCode ->
                 viewModel.signInWithBattleNet(authCode)
+                // The AuthStateViewModel will detect the saved token and navigate automatically
             },
             enabled = !uiState.isLoading,
             modifier = Modifier.fillMaxWidth()
         )
+
 
         Spacer(modifier = Modifier.height(24.dp))
 

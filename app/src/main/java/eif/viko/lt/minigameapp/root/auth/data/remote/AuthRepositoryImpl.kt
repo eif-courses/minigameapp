@@ -5,12 +5,14 @@ import android.content.Context
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.BattleNetTokenRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignInRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignUpRequest
-import eif.viko.lt.minigameapp.root.auth.data.remote.mappers.toDomainModel
+import eif.viko.lt.minigameapp.root.auth.data.remote.dto.toDomainModel
+
 import eif.viko.lt.minigameapp.root.auth.domain.models.AuthResult
 import eif.viko.lt.minigameapp.root.auth.domain.models.TokenData
 import eif.viko.lt.minigameapp.root.auth.domain.models.User
 import eif.viko.lt.minigameapp.root.auth.domain.repository.AuthRepository
 import eif.viko.lt.minigameapp.root.auth.domain.utils.TokenStorage
+import kotlinx.coroutines.delay
 import okio.IOException
 import retrofit2.HttpException
 
@@ -53,7 +55,10 @@ class AuthRepositoryImpl(
             val response = api.signUp(request)
 
             // Don't save token since registration doesn't return one
-            AuthResult.Success(response.user.toDomainModel())
+            AuthResult.Success(response.user.toDomainModel(
+                authProvider = "email",
+                hasBattleNet = false
+            ))
         } catch (e: HttpException) {
             when (e.code()) {
                 400 -> AuthResult.Error("All fields are required")
@@ -94,29 +99,48 @@ class AuthRepositoryImpl(
 
     override suspend fun signInWithBattleNet(authorizationCode: String): AuthResult<TokenData> {
         return try {
+            println("🔄 SignInWithBattleNetUseCase: Starting...")
+
             val request = BattleNetTokenRequest(
                 authorizationCode = authorizationCode,
                 redirectURI = "https://minigameapi-production.up.railway.app/oauth/mobile"
             )
+
+            println("📡 Making API call to backend...")
             val response = api.signInWithBattleNet(request)
-            val domainModel = response.toDomainModel()
+            println("✅ API response received")
 
+            println("🔄 Converting response to domain model...")
+            val domainModel = response.toDomainModel(
+                authProvider = "battlenet",
+                hasBattleNet = true
+            )
+            println("✅ Domain model created - User: ${domainModel.user.email}")
+            println("✅ Access token length: ${domainModel.accessToken.length}")
+
+            println("💾 About to save token...")
             tokenStorage.saveToken(domainModel.accessToken)
+            println("💾 Token save call completed")
 
-            AuthResult.Success(domainModel)
-        } catch (e: HttpException) {
-            when (e.code()) {
-                400 -> AuthResult.Error("Invalid authorization code")
-                401 -> AuthResult.Unauthorized
-                else -> AuthResult.Error("Battle.net authentication failed: ${e.message()}")
+            // Test immediately if token was saved
+            println("🔍 Testing if token was saved...")
+            val testToken = tokenStorage.getToken()
+            if (testToken == null) {
+                println("❌ CRITICAL: Token was NOT saved!")
+                return AuthResult.Error("Failed to save authentication token")
+            } else {
+                println("✅ Token verified: ${testToken.take(20)}...")
             }
-        } catch (e: IOException) {
-            AuthResult.Error("Network connection error. Please check your internet.")
+
+            println("🎉 SignInWithBattleNet completed successfully")
+            AuthResult.Success(domainModel)
+
         } catch (e: Exception) {
-            AuthResult.Error("Unexpected error: ${e.message}")
+            println("❌ SignInWithBattleNet ERROR: ${e.message}")
+            println("❌ Stack trace: ${e.stackTrace.joinToString("\n")}")
+            AuthResult.Error("Sign in failed: ${e.message}")
         }
     }
-
     override suspend fun clearOAuthCodes() {
         try {
             val prefs = context.getSharedPreferences("oauth_temp", Context.MODE_PRIVATE)
@@ -125,6 +149,37 @@ class AuthRepositoryImpl(
             // Ignore errors
         }
     }
+
+    override suspend fun getCurrentUser(): User? {
+        return try {
+            val token = tokenStorage.getToken()
+            if (token != null) {
+                val response = api.getCurrentUser("Bearer $token")
+                response.user.toDomainModel(
+                    authProvider = response.authProvider,
+                    hasBattleNet = response.hasBattleNet
+                )
+            } else {
+                null
+            }
+        } catch (e: HttpException) {
+            when (e.code()) {
+                401 -> {
+                    // Token expired, clear it
+                    tokenStorage.clearToken()
+                    null
+                }
+                else -> null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
+
+
+
 
 
 }

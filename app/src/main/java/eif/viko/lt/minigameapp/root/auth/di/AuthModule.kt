@@ -1,5 +1,7 @@
 package eif.viko.lt.minigameapp.root.auth.di
 
+import android.app.Application
+import android.content.Context
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import eif.viko.lt.minigameapp.root.BuildConfig
@@ -33,6 +35,40 @@ val authModule = module {
     single<TokenStorage> {
         SecureTokenStorage(context = get())
     }
+
+//    single<TokenStorage> {
+//        object : TokenStorage {
+//            private val prefs = get<Application>().getSharedPreferences("debug_auth", Context.MODE_PRIVATE)
+//
+//            override suspend fun saveToken(token: String) {
+//                println("💾 DEBUG: Saving token: ${token.take(20)}...")
+//                val success = prefs.edit().putString("auth_token", token).commit()
+//                println("💾 DEBUG: Save result = $success")
+//
+//                // Verify immediately
+//                val saved = prefs.getString("auth_token", null)
+//                println("💾 DEBUG: Immediate verification: ${saved?.take(20)}...")
+//            }
+//
+//            override suspend fun getToken(): String? {
+//                val token = prefs.getString("auth_token", null)
+//                println("🔍 DEBUG: Retrieved token: ${token?.take(20)}...")
+//                return token
+//            }
+//
+//            override suspend fun clearToken() {
+//                prefs.edit().remove("auth_token").commit()
+//                println("🧹 DEBUG: Token cleared")
+//            }
+//
+//            override suspend fun hasValidToken(): Boolean {
+//                val token = getToken()
+//                val isValid = token != null && token.isNotBlank()
+//                println("🔍 DEBUG: hasValidToken = $isValid")
+//                return isValid
+//            }
+//        }
+//    }
 
     // Tokeno iterpimui i http requestus
     single<AuthInterceptor>{

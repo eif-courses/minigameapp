@@ -14,6 +14,7 @@ interface AuthRepository {
     //OAuth
     suspend fun signInWithBattleNet(authorizationCode: String): AuthResult<TokenData>
     suspend fun clearOAuthCodes()
+    suspend fun getCurrentUser(): User?
 
 
 }
