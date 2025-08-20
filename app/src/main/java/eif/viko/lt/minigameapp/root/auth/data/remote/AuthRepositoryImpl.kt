@@ -1,5 +1,7 @@
 package eif.viko.lt.minigameapp.root.auth.data.remote
 
+import android.app.Application
+import android.content.Context
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.BattleNetTokenRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignInRequest
 import eif.viko.lt.minigameapp.root.auth.data.remote.dto.SignUpRequest
@@ -14,7 +16,8 @@ import retrofit2.HttpException
 
 class AuthRepositoryImpl(
     private val api: AuthApi,
-    private val tokenStorage: TokenStorage
+    private val tokenStorage: TokenStorage,
+    private val context: Application
 ) : AuthRepository {
 
     override suspend fun signIn(email: String, password: String): AuthResult<TokenData> {
@@ -65,7 +68,17 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun signOut() {
-        tokenStorage.clearToken()
+        try {
+            // Clear stored token
+            tokenStorage.clearToken()
+
+            // Clear OAuth codes
+            clearOAuthCodes()
+
+            // Any other cleanup
+        } catch (e: Exception) {
+            // Log error but don't throw - we want sign out to always succeed
+        }
     }
 
     override suspend fun isUserIsSignedIn(): Boolean {
@@ -75,6 +88,7 @@ class AuthRepositoryImpl(
     override suspend fun getCurrentToken(): String? {
         return tokenStorage.getToken()
     }
+
 
 
 
@@ -100,6 +114,15 @@ class AuthRepositoryImpl(
             AuthResult.Error("Network connection error. Please check your internet.")
         } catch (e: Exception) {
             AuthResult.Error("Unexpected error: ${e.message}")
+        }
+    }
+
+    override suspend fun clearOAuthCodes() {
+        try {
+            val prefs = context.getSharedPreferences("oauth_temp", Context.MODE_PRIVATE)
+            prefs.edit().clear().apply()
+        } catch (e: Exception) {
+            // Ignore errors
         }
     }
 

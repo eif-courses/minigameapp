@@ -13,22 +13,20 @@ import eif.viko.lt.minigameapp.root.auth.domain.repository.AuthRepository
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignInUseCase
 import eif.viko.lt.minigameapp.root.auth.domain.use_cases.SignInWithBattleNetUseCase
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 class SignInViewModel(
     private val signInUseCase: SignInUseCase,
     private val signInWithBattleNetUseCase: SignInWithBattleNetUseCase,
-    private val authRepository: AuthRepository
-): ViewModel(), KoinComponent {
-
-    private val context: Application by inject()
+    private val authRepository: AuthRepository,
+    private val context: Application
+): ViewModel() {
 
     var uiState by mutableStateOf(SignInUiState())
 
     init {
         checkAuthStatus()
-        checkForOAuthCode()
+        //checkForOAuthCode()
+        clearAnyLeftoverOAuthCodes()
     }
 
     private fun checkAuthStatus() {
@@ -38,7 +36,45 @@ class SignInViewModel(
         }
     }
 
-    private fun checkForOAuthCode() {
+
+    private fun clearAnyLeftoverOAuthCodes() {
+        viewModelScope.launch {
+            try {
+                val prefs = context.getSharedPreferences("oauth_temp", Context.MODE_PRIVATE)
+                prefs.edit().clear().apply()
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+    }
+
+//    private fun checkForOAuthCode() {
+//        viewModelScope.launch {
+//            val prefs = context.getSharedPreferences("oauth_temp", Context.MODE_PRIVATE)
+//            val authCode = prefs.getString("auth_code", null)
+//            val authError = prefs.getString("auth_error", null)
+//
+//            when {
+//                authCode != null -> {
+//                    // Clear the stored code
+//                    prefs.edit().remove("auth_code").apply()
+//                    // Process the auth code
+//                    signInWithBattleNet(authCode)
+//                }
+//                authError != null -> {
+//                    // Clear the stored error
+//                    prefs.edit().remove("auth_error").apply()
+//                    // Show error
+//                    uiState = uiState.copy(
+//                        isLoading = false,
+//                        error = "Battle.net authentication failed: $authError"
+//                    )
+//                }
+//            }
+//        }
+//    }
+
+    fun checkAndProcessOAuthCode() {
         viewModelScope.launch {
             val prefs = context.getSharedPreferences("oauth_temp", Context.MODE_PRIVATE)
             val authCode = prefs.getString("auth_code", null)
@@ -46,15 +82,11 @@ class SignInViewModel(
 
             when {
                 authCode != null -> {
-                    // Clear the stored code
                     prefs.edit().remove("auth_code").apply()
-                    // Process the auth code
                     signInWithBattleNet(authCode)
                 }
                 authError != null -> {
-                    // Clear the stored error
                     prefs.edit().remove("auth_error").apply()
-                    // Show error
                     uiState = uiState.copy(
                         isLoading = false,
                         error = "Battle.net authentication failed: $authError"
@@ -63,6 +95,7 @@ class SignInViewModel(
             }
         }
     }
+
 
     fun signIn(email: String, password: String) {
         if (uiState.isLoading) return
@@ -126,12 +159,12 @@ class SignInViewModel(
         }
     }
 
-    fun signOut() {
-        viewModelScope.launch {
-            authRepository.signOut()
-            uiState = SignInUiState()
-        }
-    }
+//    fun signOut() {
+//        viewModelScope.launch {
+//            authRepository.signOut()
+//            uiState = SignInUiState()
+//        }
+//    }
 
     fun clearError() {
         uiState = uiState.copy(error = null)

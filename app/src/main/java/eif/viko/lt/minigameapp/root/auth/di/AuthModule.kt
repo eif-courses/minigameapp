@@ -20,6 +20,7 @@ import eif.viko.lt.minigameapp.root.auth.presentation.viewmodel.SignUpViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -30,7 +31,7 @@ val authModule = module {
 
     // Tokenu saugykla
     single<TokenStorage> {
-        SecureTokenStorage(context = androidContext())
+        SecureTokenStorage(context = get())
     }
 
     // Tokeno iterpimui i http requestus
@@ -81,29 +82,16 @@ val authModule = module {
     single<AuthRepository> {
         AuthRepositoryImpl(
             api = get(),
-            tokenStorage = get()
+            tokenStorage = get(),
+            context = get()
         )
     }
 
-    /* Use Cases */
-    single<SignInUseCase> {
-        SignInUseCase(
-            repository = get()
-        )
-    }
-    single<CheckAuthStatusUseCase>{
-        CheckAuthStatusUseCase(repository = get())
-    }
-    single<SignOutUseCase>{
-        SignOutUseCase(repository = get())
-    }
-
-    single<SignUpUseCase>{
-        SignUpUseCase(repository = get())
-    }
-    single <SignInWithBattleNetUseCase>{
-        SignInWithBattleNetUseCase(repository = get())
-    }
+    factoryOf(::SignInUseCase)
+    factoryOf(::SignInWithBattleNetUseCase)
+    factoryOf(::CheckAuthStatusUseCase)
+    factoryOf(::SignUpUseCase)
+    factoryOf(::SignOutUseCase)
 
     viewModelOf(::SignInViewModel)      // Replace viewModel<SignInViewModel> { SignInViewModel(...) }
     viewModelOf(::SignUpViewModel)      // Replace viewModel<SignUpViewModel> { SignUpViewModel(...) }

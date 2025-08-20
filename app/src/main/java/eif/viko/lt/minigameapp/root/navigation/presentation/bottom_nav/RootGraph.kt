@@ -23,23 +23,25 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun RootGraph() {
-
-    // ADD THIS: Get the AuthStateViewModel
     val authViewModel: AuthStateViewModel = koinViewModel()
     val backStack = rememberNavBackStack<Screen>(Screen.Auth)
 
-    // ADD THIS: Handle navigation based on auth state
+    // Handle navigation based on auth state
     LaunchedEffect(authViewModel.authState) {
         when (authViewModel.authState) {
             is AuthState.Authenticated -> {
                 // User is logged in, go to main app
-                backStack.clear()
-                backStack.add(Screen.NestedGraph)
+                if (backStack.lastOrNull() != Screen.NestedGraph) {
+                    backStack.clear()
+                    backStack.add(Screen.NestedGraph)
+                }
             }
             is AuthState.Unauthenticated -> {
                 // User is not logged in, show auth screen
-                backStack.clear()
-                backStack.add(Screen.Auth)
+                if (backStack.lastOrNull() != Screen.Auth) {
+                    backStack.clear()
+                    backStack.add(Screen.Auth)
+                }
             }
             is AuthState.Loading -> {
                 // Do nothing, show loading
@@ -47,7 +49,7 @@ fun RootGraph() {
         }
     }
 
-    // ADD THIS: Show loading while checking auth status
+    // Show loading while checking auth status
     if (authViewModel.authState is AuthState.Loading) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -69,7 +71,6 @@ fun RootGraph() {
             entry<Screen.Auth> {
                 SignInScreen(
                     onNavigateToHome = {
-                        // CHANGE THIS: Notify auth success instead of direct navigation
                         authViewModel.onSignInSuccess()
                     },
                     onNavigateToSignUp = {
@@ -78,7 +79,7 @@ fun RootGraph() {
                 )
             }
 
-            entry<Screen.SignUp>{
+            entry<Screen.SignUp> {
                 SignUpScreen(
                     onNavigateToSignIn = {
                         backStack.removeLastOrNull()
@@ -93,21 +94,21 @@ fun RootGraph() {
                 ) {
                     Button(
                         onClick = {
-                            // CHANGE THIS: Sign out instead of just going back
                             authViewModel.signOut()
                         }
                     ) {
-                        Text(text = "Sign Out") // Change text
+                        Text(text = "Sign Out")
                     }
                 }
             }
+
             entry<Screen.NestedGraph> {
                 NestedGraph(
                     navigateToSettings = {
                         backStack.add(Screen.Settings)
                     },
-                    // ADD THIS: Pass sign out function
                     onSignOut = {
+                        // FIXED: Call authViewModel.signOut() instead of direct navigation
                         authViewModel.signOut()
                     }
                 )

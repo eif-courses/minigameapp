@@ -2,6 +2,7 @@ package eif.viko.lt.minigameapp.root.auth.domain.utils
 
 // In data/local or data/storage
 
+import android.app.Application
 import android.content.Context
 import android.util.Base64
 import androidx.datastore.preferences.core.edit
@@ -25,7 +26,7 @@ interface TokenStorage {
 }
 
 class SecureTokenStorage(
-    private val context: Context
+    private val context: Application
 ) : TokenStorage {
 
     private val Context.dataStore by preferencesDataStore(name = "auth_prefs")

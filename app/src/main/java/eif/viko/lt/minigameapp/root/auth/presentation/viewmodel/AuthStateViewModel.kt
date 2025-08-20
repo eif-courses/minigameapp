@@ -1,5 +1,7 @@
 package eif.viko.lt.minigameapp.root.auth.presentation.viewmodel
 
+import android.app.Application
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,7 +13,8 @@ import kotlinx.coroutines.launch
 
 class AuthStateViewModel(
     private val checkAuthStatusUseCase: CheckAuthStatusUseCase,
-    private val signOutUseCase: SignOutUseCase
+    private val signOutUseCase: SignOutUseCase,
+    private val context: Application
 ) : ViewModel() {
 
     var authState by mutableStateOf<AuthState>(AuthState.Loading)
@@ -32,8 +35,19 @@ class AuthStateViewModel(
     }
     fun signOut(){
         viewModelScope.launch {
-            signOutUseCase()
-            authState = AuthState.Unauthenticated
+
+            try {
+                // Clear any stored auth codes that might cause auto-login
+                signOutUseCase()
+                clearStoredOAuthCodes()
+
+                // Update state
+                authState = AuthState.Unauthenticated
+            } catch (e: Exception) {
+                // Even if sign out fails, set to unauthenticated
+                authState = AuthState.Unauthenticated
+            }
+
         }
     }
     fun onSignInSuccess(){
@@ -41,6 +55,17 @@ class AuthStateViewModel(
     }
     fun refreshAuthStatus(){
         checkAuthStatus()
+    }
+
+    private fun clearStoredOAuthCodes() {
+        try {
+            // Clear SharedPreferences oauth codes
+            // This prevents the automatic login issue you mentioned earlier
+            val prefs = context.getSharedPreferences("oauth_temp", Context.MODE_PRIVATE)
+            prefs.edit().clear().apply()
+        } catch (e: Exception) {
+            // Ignore errors
+        }
     }
 
 

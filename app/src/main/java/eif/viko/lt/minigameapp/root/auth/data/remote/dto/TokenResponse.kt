@@ -1,11 +1,23 @@
 package eif.viko.lt.minigameapp.root.auth.data.remote.dto
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+
 
 @JsonClass(generateAdapter = true)
 data class TokenResponse(
+    @param:Json(name = "access_token")
+    val accessToken: String,
+    @param:Json(name = "user")
     val user: UserDto,
-    val access_token: String,
-    val message: String,
-    val auth_method: String
+    @param:Json(name = "message")
+    val message: String? = null, // Make this optional with default value
+    @param:Json(name = "success")
+    val success: Boolean? = null, // Make this optional too
+    @param:Json(name = "token_type")
+    val tokenType: String? = null, // Make this optional
+    @param:Json(name = "expires_in")
+    val expiresIn: Int? = null, // Make this optional
+    @param:Json(name = "provider")
+    val provider: String? = null // Make this optional
 )

@@ -1,5 +1,6 @@
 package eif.viko.lt.minigameapp.root.auth.presentation.components
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
@@ -16,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.graphics.toColorInt
 
+
+
 @Composable
 fun BattleNetSignInButton(
     onAuthCode: (String) -> Unit,
@@ -23,22 +26,51 @@ fun BattleNetSignInButton(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    var hasStartedOAuth by remember { mutableStateOf(false) }
+
+    // Periodically check for OAuth code if OAuth flow was started
+    LaunchedEffect(hasStartedOAuth) {
+        if (hasStartedOAuth) {
+            while (hasStartedOAuth) {
+                kotlinx.coroutines.delay(1000) // Check every second
+
+                val prefs = context.getSharedPreferences("oauth_temp", Context.MODE_PRIVATE)
+                val authCode = prefs.getString("auth_code", null)
+
+                if (authCode != null) {
+                    prefs.edit().remove("auth_code").apply()
+                    hasStartedOAuth = false
+                    onAuthCode(authCode)
+                    break
+                }
+            }
+        }
+    }
 
     Button(
         onClick = {
-            // Build the OAuth URL to get authorization code
-            val authUrl = buildBattleNetAuthUrl()
+            val prefs = context.getSharedPreferences("oauth_temp", Context.MODE_PRIVATE)
+            val existingCode = prefs.getString("auth_code", null)
 
-            val customTabsIntent = CustomTabsIntent.Builder()
-                .setToolbarColor("#0084FF".toColorInt())
-                .setShowTitle(true)
-                .build()
+            if (existingCode != null) {
+                prefs.edit().remove("auth_code").apply()
+                onAuthCode(existingCode)
+            } else {
+                prefs.edit().clear().apply()
+                hasStartedOAuth = true // Start monitoring for OAuth code
 
-            try {
-                customTabsIntent.launchUrl(context, authUrl.toUri())
-            } catch (e: Exception) {
-                val intent = Intent(Intent.ACTION_VIEW, authUrl.toUri())
-                context.startActivity(intent)
+                val authUrl = buildBattleNetAuthUrl()
+                val customTabsIntent = CustomTabsIntent.Builder()
+                    .setToolbarColor("#0084FF".toColorInt())
+                    .setShowTitle(true)
+                    .build()
+
+                try {
+                    customTabsIntent.launchUrl(context, authUrl.toUri())
+                } catch (e: Exception) {
+                    val intent = Intent(Intent.ACTION_VIEW, authUrl.toUri())
+                    context.startActivity(intent)
+                }
             }
         },
         modifier = modifier,
