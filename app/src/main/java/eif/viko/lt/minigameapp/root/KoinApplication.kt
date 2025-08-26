@@ -3,6 +3,8 @@ package eif.viko.lt.minigameapp.root
 import android.app.Application
 
 import eif.viko.lt.minigameapp.root.auth.di.authModule
+import eif.viko.lt.minigameapp.root.core.di.coreModule
+import eif.viko.lt.minigameapp.root.core.di.networkModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -13,9 +15,9 @@ class KoinApplication : Application(){
         startKoin {
             androidLogger()
             androidContext(this@KoinApplication)
-            modules(
-                authModule,
-                //repositoryModule
+            modules(authModule,
+                coreModule,
+                networkModule
             ) // Pridėti modulius iš DI package
         }
     }

@@ -11,8 +11,7 @@ import eif.viko.lt.minigameapp.root.auth.domain.models.AuthResult
 import eif.viko.lt.minigameapp.root.auth.domain.models.TokenData
 import eif.viko.lt.minigameapp.root.auth.domain.models.User
 import eif.viko.lt.minigameapp.root.auth.domain.repository.AuthRepository
-import eif.viko.lt.minigameapp.root.auth.domain.utils.TokenStorage
-import kotlinx.coroutines.delay
+import eif.viko.lt.minigameapp.root.core.data.storage.TokenStorage
 import okio.IOException
 import retrofit2.HttpException
 

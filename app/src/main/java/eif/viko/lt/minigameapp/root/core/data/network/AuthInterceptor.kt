@@ -1,7 +1,6 @@
-package eif.viko.lt.minigameapp.root.auth.data.remote
+package eif.viko.lt.minigameapp.root.core.data.network
 
-
-import eif.viko.lt.minigameapp.root.auth.domain.utils.TokenStorage
+import eif.viko.lt.minigameapp.root.core.data.storage.TokenStorage
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response

@@ -1,4 +1,4 @@
-package eif.viko.lt.minigameapp.root.auth.domain.utils
+package eif.viko.lt.minigameapp.root.core.data.storage
 
 // In data/local or data/storage
 
@@ -11,6 +11,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.aead.AeadConfig
+import com.google.crypto.tink.aead.AesGcmKeyManager
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -18,12 +19,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-interface TokenStorage {
-    suspend fun saveToken(token: String)
-    suspend fun getToken(): String?
-    suspend fun clearToken()
-    suspend fun hasValidToken(): Boolean
-}
 
 class SecureTokenStorage(
     private val context: Application
@@ -38,7 +33,7 @@ class SecureTokenStorage(
         AeadConfig.register()
         val keysetHandle: KeysetHandle = AndroidKeysetManager.Builder()
             .withSharedPref(context, "master_keyset", "master_prefs")
-            .withKeyTemplate(com.google.crypto.tink.aead.AesGcmKeyManager.aes256GcmTemplate())
+            .withKeyTemplate(AesGcmKeyManager.aes256GcmTemplate())
             .withMasterKeyUri("android-keystore://master_key")
             .build()
             .keysetHandle
